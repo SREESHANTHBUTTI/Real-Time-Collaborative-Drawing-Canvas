@@ -1,11 +1,7 @@
-// server.js
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
-
 const DrawingState = require('./drawing-state');
-const RoomManager = require('./rooms');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,43 +9,53 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// Serve client files
-app.use(express.static(path.join(__dirname, '../client')));
+// Serve static files from client folder
+app.use(express.static(__dirname + '/../client'));
 
-// Create drawing state and rooms
+// Create a DrawingState instance
 const drawingState = new DrawingState();
-const roomManager = new RoomManager();
 
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log('A user connected: ' + socket.id);
 
-  // Send current canvas history
+  // Send current canvas history to new user
   socket.emit('initCanvas', drawingState.getHistory());
 
-  // Drawing event from client
-  socket.on('draw', (data) => {
-    drawingState.addStroke(data);
-    socket.broadcast.emit('draw', data);
+  // When a user draws
+  socket.on('draw', (stroke) => {
+    drawingState.addStroke(stroke);
+    // Broadcast the stroke to all other users
+    socket.broadcast.emit('draw', stroke);
   });
 
-  // Undo event
+  // Handle undo
   socket.on('undo', () => {
-    drawingState.undo();
-    io.emit('clearCanvas');
-    io.emit('initCanvas', drawingState.getHistory());
+    const undone = drawingState.undo();
+    if (undone) {
+      // Send updated history to all clients
+      io.emit('initCanvas', drawingState.getHistory());
+    }
   });
 
-  // Clear canvas
+  // Handle redo
+  socket.on('redo', () => {
+    const redone = drawingState.redo();
+    if (redone) {
+      io.emit('initCanvas', drawingState.getHistory());
+    }
+  });
+
+  // Handle clear canvas
   socket.on('clear', () => {
     drawingState.clear();
     io.emit('clearCanvas');
   });
 
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
+    console.log('A user disconnected: ' + socket.id);
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -7,9 +7,11 @@ canvas.height = window.innerHeight * 0.7;
 let drawing = false;
 let brushColor = '#000000';
 let brushSize = 3;
+let currentStroke = []; // store all points in this stroke
 
 const startDraw = (e) => {
   drawing = true;
+  currentStroke = [{ x: e.offsetX, y: e.offsetY }];
   ctx.beginPath();
   ctx.moveTo(e.offsetX, e.offsetY);
 };
@@ -22,12 +24,17 @@ const draw = (e) => {
   ctx.lineTo(e.offsetX, e.offsetY);
   ctx.stroke();
 
-  sendDrawEvent({ x: e.offsetX, y: e.offsetY, color: brushColor, size: brushSize });
+  currentStroke.push({ x: e.offsetX, y: e.offsetY });
 };
 
 const stopDraw = () => {
+  if (!drawing) return;
   drawing = false;
   ctx.closePath();
+
+  // Send the full stroke to server
+  sendDrawEvent({ points: currentStroke, color: brushColor, size: brushSize });
+  currentStroke = [];
 };
 
 canvas.addEventListener('mousedown', startDraw);

@@ -1,15 +1,12 @@
-// drawing-state.js
-// Manages the shared drawing history and state for all users.
-
 class DrawingState {
   constructor() {
-    this.history = [];   // stores all strokes
-    this.redoStack = []; // stores undone strokes
+    this.history = [];
+    this.redoStack = [];
   }
 
   addStroke(stroke) {
-    this.history.push(stroke);
-    this.redoStack = []; // clear redo history whenever new stroke is added
+    this.history.push(stroke); // stroke has points array
+    this.redoStack = [];
   }
 
   undo() {
