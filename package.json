@@ -1,0 +1,13 @@
+{
+  "name": "real-time-collaborative-drawing-canvas",
+  "version": "1.0.0",
+  "description": "A multi-user collaborative drawing app using Node.js, WebSockets, and HTML5 Canvas.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

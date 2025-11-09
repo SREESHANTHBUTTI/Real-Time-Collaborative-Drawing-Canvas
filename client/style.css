@@ -1,0 +1,16 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: #f7f8fa;
+}
+
+canvas {
+  border: 2px solid #444;
+  margin-top: 10px;
+  cursor: crosshair;
+  background: #fff;
+}
+
+.toolbar {
+  margin: 10px;
+}
